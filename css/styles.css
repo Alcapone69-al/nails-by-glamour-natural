@@ -334,5 +334,9 @@ body.modal-open { overflow: hidden; }
   .js .reveal { opacity: 1; transform: none; }
 }
 
+/* Horários indisponíveis (ex.: sábado depois das 17:00) */
+.slot input:disabled { cursor: not-allowed; }
+.slot input:disabled + span { opacity: .4; text-decoration: line-through; border-color: var(--nude); }
+
 /* O atributo hidden deve sempre esconder, mesmo em elementos com display próprio */
 [hidden] { display: none !important; }
