@@ -60,7 +60,7 @@
       const card = el('article', { class: 'service-card reveal' }, [
         el('h3', { text: s.name }),
         el('p', { text: s.description }),
-        el('div', { class: 'service-meta' }, [el('span', { class: 'service-duration', text: `⏱ ${s.duration}` }), priceEl]),
+        el('div', { class: 'service-meta' }, [s.duration ? el('span', { class: 'service-duration', text: `⏱ ${s.duration}` }) : el('span'), priceEl]),
         btn
       ]);
       grid.append(card);
