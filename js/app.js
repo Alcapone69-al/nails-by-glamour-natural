@@ -103,8 +103,20 @@
     footerWa.href = waLink(generic);
     if (!waConfigured) $('#footer-wa-note').textContent = '(número de demonstração)';
     const hours = $('#footer-hours');
-    hours.textContent = BUSINESS.hours + ' ';
-    if (BUSINESS.hoursIsDemo) hours.append(el('span', { class: 'demo-tag', text: 'demonstração' }));
+    hours.replaceChildren();
+    [].concat(BUSINESS.hours).forEach((h, i) => {
+      if (i) hours.append(document.createElement('br'));
+      hours.append(document.createTextNode(h));
+    });
+    if (BUSINESS.hoursIsDemo) hours.append(' ', el('span', { class: 'demo-tag', text: 'demonstração' }));
+    if (BUSINESS.walkIn) hours.append(document.createElement('br'), el('span', { class: 'footer-muted', text: BUSINESS.walkIn }));
+    const phones = $('#footer-phones');
+    if (phones) BUSINESS.phones.forEach((p, i) => {
+      if (i) phones.append(' · ');
+      phones.append(el('a', { href: `tel:+258${p}`, text: p }));
+    });
+    const addr = $('#footer-address');
+    if (addr) addr.textContent = `${BUSINESS.address}, ${BUSINESS.city}`;
     $('#year').textContent = new Date().getFullYear();
   }
 
@@ -150,6 +162,21 @@
     });
 
     fDate.min = todayISO();
+
+    function weekdayOf(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d).getDay();
+    }
+    // Ao sábado o salão fecha às 18:00: desativa os horários mais tardios.
+    function refreshSlots() {
+      const sat = fDate.value && weekdayOf(fDate.value) === 6;
+      $$('input', slots).forEach((inp) => {
+        const off = sat && inp.value > SATURDAY_LAST_SLOT;
+        inp.disabled = off;
+        inp.closest('label').classList.toggle('is-disabled', off);
+        if (off && inp.checked) inp.checked = false;
+      });
+    }
 
     function showStep(n) {
       form.hidden = n !== 1;
@@ -203,7 +230,8 @@
       if (!fService.value) problems.push(['service', fService, 'Escolha um serviço.']);
       if (!fDate.value) problems.push(['date', fDate, 'Escolha a data desejada.']);
       else if (fDate.value < todayISO()) problems.push(['date', fDate, 'Escolha uma data a partir de hoje.']);
-      if (!selectedTime()) problems.push(['time', slots.querySelector('input'), 'Escolha um horário.']);
+      else if (CLOSED_WEEKDAYS.includes(weekdayOf(fDate.value))) problems.push(['date', fDate, 'Ao domingo não há atendimento. Escolha outro dia.']);
+      if (!selectedTime()) problems.push(['time', slots.querySelector('input:not(:disabled)'), 'Escolha um horário.']);
       if (fName.value.trim().length < 2) problems.push(['name', fName, 'Escreva o seu nome.']);
       problems.forEach(([key, input, msg]) => setError(key, key === 'time' ? null : input, msg));
       if (problems.length) problems[0][1].focus();
@@ -211,7 +239,7 @@
     }
     // Limpar o erro de um campo ao corrigi-lo
     fService.addEventListener('change', () => { errors.service.textContent = ''; fService.removeAttribute('aria-invalid'); });
-    fDate.addEventListener('change', () => { errors.date.textContent = ''; fDate.removeAttribute('aria-invalid'); });
+    fDate.addEventListener('change', () => { errors.date.textContent = ''; fDate.removeAttribute('aria-invalid'); refreshSlots(); });
     fName.addEventListener('input', () => { errors.name.textContent = ''; fName.removeAttribute('aria-invalid'); });
     slots.addEventListener('change', () => { errors.time.textContent = ''; });
 

@@ -8,93 +8,60 @@
 /* 1) NÚMERO DE WHATSAPP
    Formato internacional, só dígitos, sem "+" nem espaços.
    Exemplo para Moçambique: "258841234567"
-   Enquanto estiver "258XXXXXXXXX" o site funciona em MODO DEMONSTRAÇÃO:
-   o WhatsApp abre com a mensagem pronta, mas sem destinatário definido. */
-const WHATSAPP_NUMBER = "258XXXXXXXXX";
+   Número retirado do Instagram oficial (@nails_byglamournatural).
+   Se voltar a "258XXXXXXXXX", o site entra em MODO DEMONSTRAÇÃO. */
+const WHATSAPP_NUMBER = "258847001353";
 
 /* 2) DADOS DA MARCA */
 const BUSINESS = {
   name: "Nails by Glamour Natural",
   instagramUrl: "https://www.instagram.com/nails_byglamournatural/",
   instagramHandle: "@nails_byglamournatural",
-  // Horário de atendimento. Quando tiver o horário real, troque o texto
-  // e ponha hoursIsDemo: false para remover a etiqueta "demonstração".
-  hours: "Segunda a sábado · 09:00 – 18:00",
-  hoursIsDemo: true,
+  phones: ["847001353", "871607779"],
+  address: "Agostinho Neto, esquina com Karl Marx",
+  city: "Maputo, Moçambique",
+  // Horário oficial (Instagram). hoursIsDemo: false => sem etiqueta de demonstração.
+  hours: [
+    "Segunda a sexta · 09:00 – 21:00",
+    "Sábado · 09:00 – 18:00"
+  ],
+  hoursIsDemo: false,
+  walkIn: "Atendimento por ordem de chegada",
   currency: "MT"
 };
 
 /* 3) HORÁRIOS QUE A CLIENTE PODE ESCOLHER
    São horários DESEJADOS (a confirmação final é feita pelo WhatsApp). */
-const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
+const TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
+/* Ao sábado o atendimento termina às 18:00: último horário a pedir. Domingo fechado. */
+const SATURDAY_LAST_SLOT = "17:00";
+const CLOSED_WEEKDAYS = [0]; // 0 = domingo
 
-/* 4) SERVIÇOS E PREÇOS
-   - id:        identificador único (sem espaços)
-   - name:      nome mostrado no cartão e enviado na mensagem
-   - description: frase curta
-   - duration:  duração estimada (texto livre)
-   - price:     número (sem moeda). Use null para "sob consulta".
-   - priceFrom: true => aparece "desde 200 MT"
-   - demo:      true => mostra a etiqueta "demo". Ponha false (ou apague)
-                quando o preço for o real.
-*/
+/* 4) SERVIÇOS E PREÇOS (tabela oficial do Instagram, destaque "Preço")
+   - id, name, description
+   - price: número (sem moeda). null => "Sob consulta".
+   - priceFrom: true => "desde 700 MT"
+   - demo: true => mostra a etiqueta "demo" (não usada: preços reais). */
 const SERVICES = [
-  {
-    id: "manicure",
-    name: "Manicure",
-    description: "Limpeza, forma e cuidado das cutículas, com acabamento à sua escolha.",
-    duration: "45 min",
-    price: 500,
-    demo: true
-  },
-  {
-    id: "gel",
-    name: "Gel",
-    description: "Esmaltagem em gel com brilho e cor que se mantêm por mais tempo.",
-    duration: "60 min",
-    price: 800,
-    demo: true
-  },
-  {
-    id: "gel-extension",
-    name: "Gel Extension",
-    description: "Alongamento em gel, com o comprimento e a forma que preferir.",
-    duration: "2 h",
-    price: 1500,
-    demo: true
-  },
-  {
-    id: "nail-art",
-    name: "Nail Art",
-    description: "Detalhes e designs personalizados para tornar as suas unhas únicas.",
-    duration: "30 min+",
-    price: 300,
-    priceFrom: true,
-    demo: true
-  },
-  {
-    id: "pedicure",
-    name: "Pedicure",
-    description: "Cuidado completo dos pés e das unhas, com acabamento delicado.",
-    duration: "60 min",
-    price: 700,
-    demo: true
-  },
-  {
-    id: "manutencao",
-    name: "Manutenção",
-    description: "Reposição e retoque de um trabalho já feito, para manter tudo impecável.",
-    duration: "75 min",
-    price: 1000,
-    demo: true
-  }
+  { id: "acrilicas", name: "Unhas acrílicas", description: "Com Gelish 850 MT · com pó colorido 800 MT.", price: 800, priceFrom: true },
+  { id: "manut-acrilicas", name: "Manutenção de acrílicas", description: "Com Gelish 750 MT · com pó colorido 700 MT.", price: 700, priceFrom: true },
+  { id: "overlay", name: "Overlay", description: "Com Gelish 750 MT · com pó colorido 700 MT.", price: 700, priceFrom: true },
+  { id: "manut-overlay", name: "Manutenção de overlay", description: "Com Gelish 700 MT · com pó colorido 600 MT.", price: 600, priceFrom: true },
+  { id: "gelish-maos", name: "Gelish nas mãos", description: "Cor e brilho em gel, com duração prolongada.", price: 400 },
+  { id: "pedicure", name: "Pedicure", description: "Cuidado completo dos pés e das unhas.", price: 500 },
+  { id: "gelish-pes", name: "Gelish nos pés", description: "Pintura em gel para pés bonitos por mais tempo.", price: 300 },
+  { id: "unhas-pes", name: "Overlay e acrílico nos pés", description: "Overlay 700 MT · acrílico 800 MT. Unhas simples: 50 MT cada.", price: 700, priceFrom: true },
+  { id: "francesinha", name: "Francesinha e base de vidro", description: "Francesinha 200 MT · base de vidro 200 MT.", price: 200 },
+  { id: "degrade", name: "Degradé", description: "Efeito degradé suave e elegante.", price: 950 },
+  { id: "nail-art", name: "Nail art", description: "Designs personalizados. O valor depende do desenho e do tamanho.", price: null },
+  { id: "remocao", name: "Remoção", description: "Remoção de Gelish 100 MT · remoção de unhas 200 MT.", price: 100, priceFrom: true }
 ];
 
 /* 5) GALERIA
    Para usar fotografias reais: ponha os ficheiros na pasta /images
    (ex.: images/trabalho-01.jpg) e troque o campo "src".
    category: "designs" | "manicure" | "closeup" | "premium"
-   Imagens atuais = ilustrações de DEMONSTRAÇÃO. */
+   Fotografias reais de @nails_byglamournatural. */
 const GALLERY_CATEGORIES = [
   { id: "all", label: "Todos" },
   { id: "designs", label: "Nail designs" },
@@ -104,12 +71,12 @@ const GALLERY_CATEGORIES = [
 ];
 
 const GALLERY = [
-  { src: "images/gallery-1.svg", category: "designs",  alt: "Unhas com detalhes florais e pontos delicados" },
-  { src: "images/gallery-2.svg", category: "manicure", alt: "Manicure em tom nude, acabamento limpo" },
-  { src: "images/gallery-3.svg", category: "closeup",  alt: "Pormenor de unhas com francesinha" },
-  { src: "images/gallery-4.svg", category: "premium",  alt: "Unhas em tom pérola com fio dourado fino" },
-  { src: "images/gallery-5.svg", category: "designs",  alt: "Unhas em tons terrosos com pontos brancos" },
-  { src: "images/gallery-6.svg", category: "manicure", alt: "Manicure em branco leitoso, unhas curtas" },
-  { src: "images/gallery-7.svg", category: "closeup",  alt: "Close-up de uma unha amêndoa com brilho" },
-  { src: "images/gallery-8.svg", category: "premium",  alt: "Unhas em tom vinho suave com detalhe dourado" }
+  { src: "images/foto-03.jpg", category: "manicure", alt: "Unhas quadradas em amarelo pastel" },
+  { src: "images/foto-04.jpg", category: "designs",  alt: "Unhas com francesinha colorida e detalhes" },
+  { src: "images/foto-05.jpg", category: "closeup",  alt: "Unhas longas em tom nude com acabamento brilhante" },
+  { src: "images/foto-06.jpg", category: "designs",  alt: "Unhas finas com detalhes vermelhos delicados" },
+  { src: "images/foto-07.jpg", category: "manicure", alt: "Unhas em rosa vivo, forma amêndoa" },
+  { src: "images/foto-08.jpg", category: "premium",  alt: "Unhas em tom vinho com acabamento profissional" },
+  { src: "images/foto-09.jpg", category: "manicure", alt: "Unhas curtas em azul claro, estilo clean" },
+  { src: "images/foto-10.jpg", category: "closeup",  alt: "Unhas nude com acabamento minimalista" }
 ];
